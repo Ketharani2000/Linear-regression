@@ -1,0 +1,133 @@
+
+
+import numpy as np
+import pandas as pd
+from google.colab import drive
+
+drive.mount('/content/drive')
+
+# Specify the correct file path
+file_path = r'/content/drive/MyDrive/Colab Notebooks/Advertising.csv'
+
+# Load data from CSV
+df = pd.read_csv(file_path)
+print(df.head())
+
+from sklearn.model_selection import train_test_split
+
+# Split the data into features (X) and target (y)
+X = df[['TV', 'radio', 'newspaper']]
+y = df['sales']
+
+# Split the data into training and testing sets (80% training, 20% testing)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.20, random_state=42)
+
+from sklearn.linear_model import LinearRegression
+
+# Create a Linear Regression model
+model = LinearRegression()
+
+# Fit the model to the training data
+model.fit(X_train, y_train)
+
+# Print the coefficients for TV, Radio, and Newspaper
+coefficients = model.coef_
+intercept = model.intercept_
+
+print("Coefficients:")
+print("TV: ", coefficients[0])
+print("Radio: ", coefficients[1])
+print("Newspaper: ", coefficients[2])
+print("Intercept: ", intercept)
+
+import numpy as np
+import statsmodels.api as sm
+from sklearn.metrics import mean_squared_error, r2_score
+from math import sqrt
+
+# Evaluate the model on training data
+y_train_pred = model.predict(X_train)
+
+# Calculate the residual sum of squares (RSS) for training data
+RSS_train = np.sum((y_train - y_train_pred)**2)
+
+# Calculate the number of model parameters (d)
+d = X_train.shape[1]  # Number of features
+
+# Calculate the residual standard error (RSE) for training data
+N_train = len(y_train)  # Total number of training data samples
+RSE_train = np.sqrt(RSS_train / (N_train - d))
+
+# Calculate the mean squared error (MSE) for training data
+MSE_train = mean_squared_error(y_train, y_train_pred)
+
+# Calculate the R^2 statistic for training data
+r_squared_train = r2_score(y_train, y_train_pred)
+
+# Fit a linear regression model using statsmodels for detailed statistics on training data
+X_train_sm = sm.add_constant(X_train)  # Add a constant term for the intercept
+model_sm_train = sm.OLS(y_train, X_train_sm).fit()
+
+# Extract detailed statistics for training data
+std_error_train = model_sm_train.bse  # Std. Error for each feature
+t_statistic_train = model_sm_train.tvalues  # t-statistic for each feature
+p_value_train = model_sm_train.pvalues  # p-value for each feature
+
+# Print the calculated statistics for training data
+print("Training Data:")
+print("Residual Sum of Squares (RSS):", RSS_train)
+print("Residual Standard Error (RSE):", RSE_train)
+print("Mean Squared Error (MSE):", MSE_train)
+print("R^2 Statistic:", r_squared_train)
+print("\nStd. Error for each feature (Training Data):")
+print(std_error_train)
+print("\nt-statistic for each feature (Training Data):")
+print(t_statistic_train)
+print("\np-value for each feature (Training Data):")
+print(p_value_train)
+
+# Evaluate the model on testing data (as previously shown)
+y_test_pred = model.predict(X_test)
+
+# Calculate the residual sum of squares (RSS) for testing data
+RSS_test = np.sum((y_test - y_test_pred)**2)
+
+# Calculate the number of model parameters (d)
+d = X_test.shape[1]  # Number of features
+
+# Calculate the residual standard error (RSE) for testing data
+N_test = len(y_test)  # Total number of testing data samples
+RSE_test = np.sqrt(RSS_test / (N_test - d))
+
+# Calculate the mean squared error (MSE) for testing data
+MSE_test = mean_squared_error(y_test, y_test_pred)
+
+# Calculate the R^2 statistic for testing data
+r_squared_test = r2_score(y_test, y_test_pred)
+
+# Print the calculated statistics for testing data
+print("\nTesting Data:")
+print("Residual Sum of Squares (RSS):", RSS_test)
+print("Residual Standard Error (RSE):", RSE_test)
+print("Mean Squared Error (MSE):", MSE_test)
+print("R^2 Statistic:", r_squared_test)
+
+# Scenario 1: Allocate $25,000 each to TV and radio, zero to newspaper
+budget_tv = 25000
+budget_radio = 25000
+budget_newspaper = 0
+
+# Predict sales based on the trained model
+predicted_sales_scenario1 = model.predict([[budget_tv, budget_radio, budget_newspaper]])
+
+print("Predicted Sales (Scenario 1):", predicted_sales_scenario1[0])
+
+# Scenario 2: Allocate $50,000 to either TV or radio, zero to newspaper
+budget_tv = 50000  # Assuming the entire budget is allocated to TV
+budget_radio = 0    # Zero budget for radio
+budget_newspaper = 0
+
+# Predict sales based on the trained model
+predicted_sales_scenario2 = model.predict([[budget_tv, budget_radio, budget_newspaper]])
+
+print("Predicted Sales (Scenario 2):", predicted_sales_scenario2[0])
